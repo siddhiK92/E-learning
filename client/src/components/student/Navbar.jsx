@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
 import { Link } from "react-router-dom";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
-import { AppContext } from "../../context/AddContext";
+import { AddContext } from "../../context/AddContext";
 
 const Navbar = () => {
   const isCourseListPage = location.pathname.includes("/course-list");
@@ -10,7 +10,7 @@ const Navbar = () => {
   const { openSignIn } = useClerk();
   const { user } = useUser();
 
-  const { navigate, isEducator } = useContext(AppContext);
+  const { navigate, isEducator } = useContext(AddContext);
 
   return (
     <div

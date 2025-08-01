@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { AppContexProvider } from "./context/AddContext.jsx";
+import { AddContexProvider } from "./context/AddContext.jsx";
 import { BrowserRouter } from "react-router-dom";
 import {ClerkProvider} from "@clerk/clerk-react"
 
@@ -19,9 +19,9 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
   <ClerkProvider  publishableKey={PUBLISHABLE_KEY} afterSignOutUrl='/'>
-    <AppContexProvider>
+    <AddContexProvider>
       <App />
-    </AppContexProvider>
+    </AddContexProvider>
   </ClerkProvider>
     
   </BrowserRouter>

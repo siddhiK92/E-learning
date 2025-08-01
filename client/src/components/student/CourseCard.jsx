@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
-import { AppContext } from "../../context/AddContext";
+import { AddContext } from "../../context/AddContext";
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course }) => {
-  const { currency, calculateRating } = useContext(AppContext);
+  const { currency, calculateRating } = useContext(AddContext);
 
   const price = Number(course?.coursePrice || 0);
   const discount = Number(course?.courseDiscount || 0);
