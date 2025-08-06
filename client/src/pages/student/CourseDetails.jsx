@@ -1,13 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddContext } from "../../context/AddContext";
-import Loading from "../../components/student/Loading";
+import Loading from "../../components/student/Loading"; 
+
 import { assets } from "../../assets/assets";
+import humanizeDuration from "humanize-duration";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
-  const { allCourses } = useContext(AddContext); // removed calculateChapterTime
+  const { allCourses } = useContext(AddContext);
+  const [openSections, setOpenSections] = useState({});
 
   const fetchCourseData = async () => {
     const findCourse = allCourses.find((course) => course._id === id);
@@ -24,7 +27,6 @@ const CourseDetails = () => {
     return <Loading />;
   }
 
-  // --- Calculate rating and review count ---
   const reviewCount = courseData.courseRatings?.length || 0;
   const rating =
     reviewCount > 0
@@ -32,14 +34,19 @@ const CourseDetails = () => {
         reviewCount
       : 0;
 
-  // --- Calculate students count ---
   const studentCount = courseData.enrolledStudents?.length || 0;
 
-  // --- Local function for chapter time ---
   const calculateChapterTime = (chapter, index) => {
     if (index === 0) return "35 min";
     if (index === 1) return "30 min";
-    return "25 min"; // default for others
+    return "25 min"; // default
+  };
+
+  const toggleSection = (index) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   return (
@@ -53,14 +60,14 @@ const CourseDetails = () => {
           {courseData.courseTitle}
         </h1>
 
-        {/* course description */}
+        {/* course description (only once) */}
         <div
           className="text-default text-gray-700 mt-4"
           dangerouslySetInnerHTML={{ __html: courseData.courseDescription }}
         ></div>
 
         {/* review and rating */}
-        <div className="flex items-center gap-2 text-sm mt-4 pt-3 pb-1 text-sm">
+        <div className="flex items-center gap-2 text-sm mt-4 pt-3 pb-1">
           <p className="text-orange-500 font-semibold">{rating.toFixed(1)}</p>
           <div className="flex">
             {[...Array(5)].map((_, i) => (
@@ -87,49 +94,87 @@ const CourseDetails = () => {
           course by <span className="text-blue-600 underline">S.M.kawade</span>
         </p>
 
+        {/* Course Structure */}
         <div className="pt-8 text-gray-800">
           <h2 className="text-xl font-semibold">Course Structure</h2>
           <div className="pt-5">
             {courseData.courseContent.map((chapter, index) => (
               <div key={index} className="border border-gray-300 bg-white mb-2 rounded">
-                <div className="flex items-center justify-between px-4 py-3 cursor-pointer select-none">
+                <div
+                  className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
+                  onClick={() => toggleSection(index)}
+                >
                   <div className="flex items-center gap-2">
                     <img
+                      className={`transform transition-transform ${
+                        openSections[index] ? "rotate-180" : ""
+                      }`}
                       src={assets.down_arrow_icon}
                       alt="arrow icon"
-                      className="inline mr-2"
                     />
-                    <p className="font-medium md:text-base text-sm">{chapter.chapterTitle}</p>
+                    <p className="font-medium md:text-base text-sm">
+                      {chapter.chapterTitle}
+                    </p>
                   </div>
                   <p className="text-sm md:text-default">
                     {chapter.chapterContent.length} lectures -{" "}
                     {calculateChapterTime(chapter, index)}
                   </p>
                 </div>
-                  <div>
-                    <ul>
-                      {chapter.chapterContent.map((lecture, i)=>(
-                        <li key={i}>
-                            <img src={assets.play_icon} alt="p" />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+
+                {/* Lecture list */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openSections[index] ? "max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300">
+                    {chapter.chapterContent.map((lecture, i) => (
+                      <li key={i} className="flex items-start gap-2 py-1">
+                        <img
+                          src={assets.play_icon}
+                          alt="play icon"
+                          className="w-4 h-4 mt-1"
+                        />
+                        <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
+                          <p>{lecture.lectureTitle}</p>
+                          <div className="flex gap-2">
+                            {lecture.isPreviewFree && (
+                              <p className="text-blue-500 cursor-pointer">
+                                Preview
+                              </p>
+                            )}
+                            <p>
+                              {humanizeDuration(
+                                lecture.lectureDuration * 60 * 1000,
+                                { units: ["h", "m"] }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* right column */}
-      <div className="md:w-2/5 w-full">
-        {courseData?.courseThumbnail && (
+      {/* right column - Thumbnail Card */}
+      <div className="max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w[420px]">
+        <img src={courseData?.courseThumbnail} alt="course thumbnail" />
+        <div className="p-4 flex gap-2 items-center">
           <img
-            src={courseData.courseThumbnail}
-            alt={courseData.courseTitle}
-            className="rounded-xl shadow-lg"
+            className="w-3.5"
+            src={assets.time_clock_icon}
+            alt="time left clock icon"
           />
-        )}
+          <p className="text-red-500 text-sm">
+            <span className="font-medium">5 days </span>left at this price!
+          </p>
+        </div>
       </div>
     </div>
   );
