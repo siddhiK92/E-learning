@@ -47,11 +47,11 @@ export const clerkWebhooks = async (req, res) => {
       }
 
       default:
-        res.status(400).json({ message: "Unhandled event type" });
+        // res.status(400).json({ message: "Unhandled event type" });
         break;
     }
   } catch (error) {
     // ✅ FIXED: typo (res.jsos -> res.json)
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
